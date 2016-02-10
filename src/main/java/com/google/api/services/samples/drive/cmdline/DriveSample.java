@@ -1,4 +1,4 @@
-package main.java.com.google.api.services.samples.drive.cmdline;
+package com.google.api.services.samples.drive.cmdline;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -92,7 +92,7 @@ public class DriveSample {
     return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
   }
 
-  public static void main(String []args) {
+  public static void launch() {
     Preconditions.checkArgument(
         !UPLOAD_FILE_PATH.startsWith("Enter ") && !DIR_FOR_DOWNLOADS.startsWith("Enter "),
         "Please enter the upload file path and download directory in %s", DriveSample.class);
