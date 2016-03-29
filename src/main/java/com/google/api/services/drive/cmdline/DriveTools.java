@@ -1,4 +1,4 @@
-package com.google.api.services.samples.drive.cmdline;
+package com.google.api.services.drive.cmdline;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -19,38 +19,28 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
+import com.google.api.services.drive.model.FileList;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 
-/**
- * A sample application that runs multiple requests against the Drive API. The requests this sample
- * makes are:
- * <ul>
- * <li>Does a resumable media upload</li>
- * <li>Updates the uploaded file by renaming it</li>
- * <li>Does a resumable media download</li>
- * <li>Does a direct media upload</li>
- * <li>Does a direct media download</li>
- * </ul>
- *
- */
-public class DriveSample {
+public class DriveTools {
 
   /**
    * Be sure to specify the name of your application. If the application name is {@code null} or
    * blank, the application will log a warning. Suggested format is "MyCompany-ProductName/1.0".
    */
-  private static final String APPLICATION_NAME = "test-backend/1.0";
-
-  private static final String UPLOAD_FILE_PATH = "/Users/adriansalas/Downloads/1.jpg";
-  private static final String DIR_FOR_DOWNLOADS =
-      "C:/Users/Maxime.PC/Desktop/CERI COURS/eclipse/JAVA/BackendFruitiereNumerique";
+  private static final String APPLICATION_NAME = "Backend_Fruitière_Numérique/1.0";
+  private static final String VILLAGE_MEDIAS = "medias_village";
+  private static final String CHATEAU_MEDIAS = "medias_chateau";
+  private static final String ZIP_EXT = ".zip";
+  private static final String UPLOAD_FILE_PATH = "C:/Users/Maxime.PC/Desktop/medias.zip";
+  private static final String DIR_FOR_DOWNLOADS = "C:/Users/Maxime.PC/Desktop/";
   private static final java.io.File UPLOAD_FILE = new java.io.File(UPLOAD_FILE_PATH);
-
   /** Directory to store user credentials. */
   private static final java.io.File DATA_STORE_DIR = new java.io.File(
       System.getProperty("user.home"), ".store/drive_sample");
@@ -75,19 +65,17 @@ public class DriveSample {
     // load client secrets
     GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(JSON_FACTORY,
-            new InputStreamReader(DriveSample.class.getResourceAsStream("/client_secrets.json")));
+            new InputStreamReader(DriveTools.class.getResourceAsStream("/client_secrets.json")));
     if (clientSecrets.getDetails().getClientId().startsWith("Enter")
         || clientSecrets.getDetails().getClientSecret().startsWith("Enter ")) {
-      System.out
-          .println("Enter Client ID and Secret from https://code.google.com/apis/console/?api=drive "
+      System.out.println("Enter Client ID and Secret from https://code.google.com/apis/console/?api=drive "
               + "into drive-cmdline-sample/src/main/resources/client_secrets.json");
       System.exit(1);
     }
     // set up authorization code flow
     GoogleAuthorizationCodeFlow flow =
         new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY, clientSecrets,
-            Collections.singleton(DriveScopes.DRIVE_FILE)).setDataStoreFactory(dataStoreFactory)
-            .build();
+            Collections.singleton(DriveScopes.DRIVE_FILE)).setDataStoreFactory(dataStoreFactory).build();
     // authorize
     return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
   }
@@ -95,7 +83,7 @@ public class DriveSample {
   public static void launch() {
     Preconditions.checkArgument(
         !UPLOAD_FILE_PATH.startsWith("Enter ") && !DIR_FOR_DOWNLOADS.startsWith("Enter "),
-        "Please enter the upload file path and download directory in %s", DriveSample.class);
+        "Please enter the upload file path and download directory in %s", DriveTools.class);
 
     try {
       httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -103,9 +91,7 @@ public class DriveSample {
       // authorization
       Credential credential = authorize();
       // set up the global Drive instance
-      drive =
-          new Drive.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(
-              APPLICATION_NAME).build();
+      drive = new Drive.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
 
       // run commands
 
@@ -115,15 +101,17 @@ public class DriveSample {
       View.header1("Updating Uploaded File Name");
       File updatedFile = updateFileWithTestSuffix(uploadedFile.getId());
 
-      View.header1("Starting Resumable Media Download");
-      downloadFile(false, updatedFile);
+      deleteFile(CHATEAU_MEDIAS);
 
+      View.header1("Starting Resumable Media Download");
+      downloadFile(false, uploadedFile);
+/*
       View.header1("Starting Simple Media Upload");
       uploadedFile = uploadFile(true);
 
       View.header1("Starting Simple Media Download");
       downloadFile(true, uploadedFile);
-
+*/
       View.header1("Success!");
       return;
     } catch (IOException e) {
@@ -139,7 +127,7 @@ public class DriveSample {
     File fileMetadata = new File();
     fileMetadata.setTitle(UPLOAD_FILE.getName());
 
-    FileContent mediaContent = new FileContent("image/jpeg", UPLOAD_FILE);
+    FileContent mediaContent = new FileContent("application/zip", UPLOAD_FILE);
 
     Drive.Files.Insert insert = drive.files().insert(fileMetadata, mediaContent);
     MediaHttpUploader uploader = insert.getMediaHttpUploader();
@@ -147,11 +135,34 @@ public class DriveSample {
     uploader.setProgressListener(new FileUploadProgressListener());
     return insert.execute();
   }
+  
+  /** Permanently delete file list, skipping the trash.  */
+  private static void delete(ArrayList<String> fileId) {
+	if(!fileId.isEmpty()) {
+	    try {
+	      for(String singleFileId : fileId) {
+	    	  drive.files().delete(singleFileId).execute();
+	      }
+	    } catch (IOException e) {
+	      System.out.println("An error occurred: " + e);
+	    }
+	}
+  }
+  
+  /**
+   * Search and delete file list matching the pattern.
+   *
+   * @param pattern Filename to match to delete.
+   */
+  private static void deleteFile(String pattern) {
+	delete(searchFile(pattern));
+  }
 
-  /** Updates the name of the uploaded file to have a "drivetest-" prefix. */
+
+  /** Updates the name of the uploaded file. */
   private static File updateFileWithTestSuffix(String id) throws IOException {
     File fileMetadata = new File();
-    fileMetadata.setTitle("drivetest-" + UPLOAD_FILE.getName());
+    fileMetadata.setTitle(CHATEAU_MEDIAS + ZIP_EXT);
 
     Drive.Files.Update update = drive.files().update(id, fileMetadata);
     return update.execute();
@@ -171,5 +182,26 @@ public class DriveSample {
     downloader.setDirectDownloadEnabled(useDirectDownload);
     downloader.setProgressListener(new FileDownloadProgressListener());
     downloader.download(new GenericUrl(uploadedFile.getDownloadUrl()), out);
+  }
+  
+  /** Search files by pattern : title, name, description ... */
+  private static ArrayList<String> searchFile(String pattern) {
+	  String pageToken = null;
+	  ArrayList<String> match = new ArrayList<String>();
+	  do {
+	      FileList result;
+		try {
+			result = drive.files().list().setQ("fullText contains '" + pattern + "'").execute();
+	      for(File file: result.getItems()) {
+	          System.out.printf("Found file: %s (%s)\n", file.getTitle(), file.getId());
+	          match.add(file.getId());
+	      }
+	      pageToken = result.getNextPageToken();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	  } while (pageToken != null);
+	  return match;
   }
 }

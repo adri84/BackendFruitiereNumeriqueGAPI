@@ -1,4 +1,4 @@
-package com.google.api.services.samples.drive.cmdline;
+package com.google.api.services.drive.cmdline;
 
 /**
  * Utility methods to print to the command line.
