@@ -35,16 +35,16 @@ public class DriveTools {
    * blank, the application will log a warning. Suggested format is "MyCompany-ProductName/1.0".
    */
   private static final String APPLICATION_NAME = "Backend_Fruitière_Numérique/1.0";
-  private static final String VILLAGE_MEDIAS = "VisiteTablette";
-  private static final String CHATEAU_MEDIAS = "VisiteChateau";
+  public static final String VILLAGE_MEDIAS = "VisiteTablette";
+  public static final String CHATEAU_MEDIAS = "VisiteChateau";
   private static final String APP_ZIP = "application/zip";
-  private static final String ZIP_EXT = ".zip";
-  private static final String MEDIAS = "medias";
-  private static final String UPLOAD_FILE_PATH_VILLAGE = MEDIAS + "/VisiteTablette.zip";
-  private static final String UPLOAD_FILE_PATH_CHATEAU = MEDIAS + "/VisiteChateau.zip";
-  private static final String DIR_FOR_DOWNLOADS = MEDIAS;
-  private static final java.io.File UPLOAD_FILE_VILLAGE = new java.io.File(UPLOAD_FILE_PATH_VILLAGE);
-  private static final java.io.File UPLOAD_FILE_CHATEAU = new java.io.File(UPLOAD_FILE_PATH_CHATEAU);
+  public static final String ZIP_EXT = ".zip";
+  public static final String MEDIAS = "medias";
+  public static final String UPLOAD_FILE_PATH_VILLAGE = MEDIAS + "/VisiteTablette.zip";
+  public static final String UPLOAD_FILE_PATH_CHATEAU = MEDIAS + "/VisiteChateau.zip";
+  public static final String DIR_FOR_DOWNLOADS = MEDIAS;
+  public static final java.io.File UPLOAD_FILE_VILLAGE = new java.io.File(UPLOAD_FILE_PATH_VILLAGE);
+  public static final java.io.File UPLOAD_FILE_CHATEAU = new java.io.File(UPLOAD_FILE_PATH_CHATEAU);
   /** Directory to store user credentials. */
   private static final java.io.File DATA_STORE_DIR = new java.io.File(
       System.getProperty("user.home"), ".store/drive_sample");
@@ -142,7 +142,7 @@ public class DriveTools {
     }
   }
 
-  public static void rename(String pattern) {
+  public static void rename(String pattern, String name) {
     try {
       if(auth()) {
 	      // run commands
@@ -150,7 +150,7 @@ public class DriveTools {
 	      View.header1("Updating Uploaded File Name");
 	      ArrayList<String> file = searchFile(pattern);
 	      if(!file.isEmpty())
-	    	  updateFileWithTestSuffix(file.get(0));
+	    	  updateFileWithTestSuffix(file.get(0), name);
 	      else
 	    	  View.header1("Error, file not found");
 	      
@@ -201,9 +201,9 @@ public class DriveTools {
 
 
   /** Updates the name of the uploaded file. */
-  private static File updateFileWithTestSuffix(String id) throws IOException {
+  private static File updateFileWithTestSuffix(String id, String name) throws IOException {
     File fileMetadata = new File();
-    fileMetadata.setTitle(CHATEAU_MEDIAS + ZIP_EXT);
+    fileMetadata.setTitle(name);
 
     Drive.Files.Update update = drive.files().update(id, fileMetadata);
     return update.execute();
