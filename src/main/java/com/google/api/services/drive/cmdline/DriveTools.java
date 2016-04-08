@@ -67,9 +67,11 @@ public class DriveTools {
   /** Authorizes the installed application to access user's protected data. */
   private static Credential authorize() throws Exception {
     // load client secrets
+	FileInputStream fis = new FileInputStream("res/client_secrets.json");
     GoogleClientSecrets clientSecrets =
         GoogleClientSecrets.load(JSON_FACTORY,
-            new InputStreamReader(new FileInputStream("res/client_secrets.json")));
+            new InputStreamReader(fis));
+	fis.close();
     if (clientSecrets.getDetails().getClientId().equals("") || clientSecrets.getDetails().getClientSecret().equals("")) {
       System.out.println("Enter Client ID and Secret from https://code.google.com/apis/console/?api=drive "
               + "into res/client_secrets.json");
@@ -223,6 +225,7 @@ public class DriveTools {
     downloader.setDirectDownloadEnabled(useDirectDownload);
     downloader.setProgressListener(new FileDownloadProgressListener());
     downloader.download(new GenericUrl(file.getDownloadUrl()), out);
+    out.close();
   }
   
   /** Search files by pattern : title, name, description ... */
