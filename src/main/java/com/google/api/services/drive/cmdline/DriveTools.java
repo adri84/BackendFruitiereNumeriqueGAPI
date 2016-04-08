@@ -123,7 +123,7 @@ public class DriveTools {
     }
   }
   
-  public static void download(String fileName) {
+  public static boolean download(String fileName) {
     try {
       if(auth()) {
 	      // run commands
@@ -132,16 +132,20 @@ public class DriveTools {
 	      File file = searchFileByFile(fileName);
 	      if(file != null)
 	    	  downloadFile(false, file);
-	      else
+	      else {
 	    	  View.header1("Error, file not found");
+	    	  return false;
+	      }
 
 	      View.header1("Success!");
+	      return true;
       }
     } catch (IOException e) {
       System.err.println(e.getMessage());
     } catch (Throwable t) {
       t.printStackTrace();
     }
+    return false;
   }
 
   public static void rename(String pattern, String name) {
