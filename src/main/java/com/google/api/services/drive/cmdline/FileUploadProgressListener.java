@@ -12,6 +12,8 @@ import java.text.NumberFormat;
  */
 public class FileUploadProgressListener implements MediaHttpUploaderProgressListener {
 
+  private double uploadProgress = 0.0;
+
   @Override
   public void progressChanged(MediaHttpUploader uploader) throws IOException {
     switch (uploader.getUploadState()) {
@@ -24,10 +26,15 @@ public class FileUploadProgressListener implements MediaHttpUploaderProgressList
       case MEDIA_IN_PROGRESS:
         View.header2("Upload is In Progress: "
             + NumberFormat.getPercentInstance().format(uploader.getProgress()));
+        uploadProgress = uploader.getProgress();
         break;
       case MEDIA_COMPLETE:
         View.header2("Upload is Complete!");
         break;
     }
+  }
+
+  public double getUploadProgress() {
+    return uploadProgress;
   }
 }
