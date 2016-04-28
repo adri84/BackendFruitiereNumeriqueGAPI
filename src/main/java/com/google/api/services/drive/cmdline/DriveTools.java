@@ -85,6 +85,7 @@ public class DriveTools {
     return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
   }
 
+  // Authentification 
   public static boolean auth() {
     try {
       httpTransport = GoogleNetHttpTransport.newTrustedTransport();
@@ -102,6 +103,7 @@ public class DriveTools {
     return false;
   }
   
+  // Upload files
   public static void upload(String file, String fileName) {
     try {
       if(auth()) {
@@ -123,6 +125,7 @@ public class DriveTools {
     }
   }
   
+  // Download files
   public static boolean download(String fileName) {
     try {
       if(auth()) {
@@ -148,11 +151,10 @@ public class DriveTools {
     return false;
   }
 
+  // Rename files
   public static void rename(String pattern, String name) {
     try {
       if(auth()) {
-	      // run commands
-	
 	      View.header1("Updating Uploaded File Name");
 	      ArrayList<String> file = searchFile(pattern);
 	      if(!file.isEmpty())
