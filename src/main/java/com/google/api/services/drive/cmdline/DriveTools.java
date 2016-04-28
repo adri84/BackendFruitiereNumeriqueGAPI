@@ -110,10 +110,8 @@ public class DriveTools {
     	  java.io.File f = new java.io.File(file);
     	  View.header1("Deleting old files from Drive");
     	  deleteFile(fileName);
-    	  
 	      View.header1("Starting Resumable Media Upload");
 	      uploadFile(false, f);
-
 	      View.header1("Success!");
       }
     } catch (IOException e) {
@@ -135,7 +133,6 @@ public class DriveTools {
 	    	  View.header1("Error, file not found");
 	    	  return false;
 	      }
-
 	      View.header1("Success!");
 	      return true;
       }
@@ -202,7 +199,6 @@ public class DriveTools {
   private static void deleteFile(String pattern) {
 	delete(searchFile(pattern));
   }
-
 
   /** Updates the name of the uploaded file. */
   private static File updateFileWithTestSuffix(String id, String name) throws IOException {
