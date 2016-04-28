@@ -107,8 +107,6 @@ public class DriveTools {
   public static void upload(String file, String fileName) {
     try {
       if(auth()) {
-	      // run commands
-	
     	  java.io.File f = new java.io.File(file);
     	  View.header1("Deleting old files from Drive");
     	  deleteFile(fileName);
@@ -129,8 +127,6 @@ public class DriveTools {
   public static boolean download(String fileName) {
     try {
       if(auth()) {
-	      // run commands
-    	  
 	      View.header1("Starting Resumable Media Download");
 	      File file = searchFileByFile(fileName);
 	      if(file != null)
