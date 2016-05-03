@@ -240,7 +240,6 @@ public class DriveTools {
 	      }
 	      pageToken = result.getNextPageToken();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	  } while (pageToken != null);
@@ -258,7 +257,6 @@ public class DriveTools {
 				return result.getItems().get(0);
 	      pageToken = result.getNextPageToken();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	  } while (pageToken != null);
